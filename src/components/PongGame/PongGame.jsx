@@ -1,18 +1,21 @@
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
 
-const COMPUTER_PADDLE_SPEED = 5;
+const COMPUTER_PADDLE_SPEED = 4;
 const BORDER_WIDTH = 5;
 const LATERAL_WALL_COLOR = "red";
 const TOP_BOTTOM_WALL_COLOR = "blue";
+const BALL_SPEED = 5;
 
 const PongGame = () => {
+  const [playerScore, setPlayerScore] = useState(0);
+  const [computerScore, setComputerScore] = useState(0);
   const canvasRef = useRef(null);
   const requestRef = useRef();
   const ballRef = useRef({
     x: 400,
     y: 300,
-    dx: 5,
-    dy: 5,
+    dx: BALL_SPEED,
+    dy: BALL_SPEED,
     radius: 10,
   });
   const playerPaddleRef = useRef({ x: 10, y: 250, width: 10, height: 100 });
@@ -66,76 +69,84 @@ const PongGame = () => {
         computerPaddle.width,
         computerPaddle.height
       );
+
+      // Dibuja el puntaje
+      ctx.font = "30px Arial";
+      ctx.fillText(`Jugador: ${playerScore}`, 50, 50);
+      ctx.fillText(
+        `Computadora: ${computerScore}`,
+        canvasRef.current.width - 250,
+        50
+      );
     },
-    [
-      /* aquí van las dependencias de draw, por ejemplo, si usas estado/props para determinar cómo dibujar algo */
-    ]
+    [playerScore, computerScore]
   );
 
-  const updatePositions = useCallback(
-    () => {
-      // Lógica para actualizar posiciones y manejar colisiones
-      const ball = ballRef.current;
-      const playerPaddle = playerPaddleRef.current;
-      const computerPaddle = computerPaddleRef.current;
-      // Ejemplo: Actualizar posición de la pelota
-      ball.x += ball.dx;
-      ball.y += ball.dy;
-      // Añade aquí la lógica de colisión
+  const updatePositions = useCallback(() => {
+    // Lógica para actualizar posiciones y manejar colisiones
+    const ball = ballRef.current;
+    const playerPaddle = playerPaddleRef.current;
+    const computerPaddle = computerPaddleRef.current;
+    // Ejemplo: Actualizar posición de la pelota
+    ball.x += ball.dx;
+    ball.y += ball.dy;
+    // Añade aquí la lógica de colisión
 
-      // Lógica de movimiento de la paleta de la computadora
-      const paddleMidpoint = computerPaddle.y + computerPaddle.height / 2;
-      if (paddleMidpoint < ball.y) {
-        // Mueve la paleta hacia abajo si la pelota está por debajo del punto medio de la paleta
-        computerPaddle.y = Math.min(
-          computerPaddle.y + COMPUTER_PADDLE_SPEED,
-          canvasRef.current.height - computerPaddle.height
-        );
-      } else if (paddleMidpoint > ball.y) {
-        // Mueve la paleta hacia arriba si la pelota está por encima del punto medio de la paleta
-        computerPaddle.y = Math.max(
-          computerPaddle.y - COMPUTER_PADDLE_SPEED,
-          0
-        );
-      }
+    // Lógica de movimiento de la paleta de la computadora
+    const paddleMidpoint = computerPaddle.y + computerPaddle.height / 2;
+    if (paddleMidpoint < ball.y) {
+      // Mueve la paleta hacia abajo si la pelota está por debajo del punto medio de la paleta
+      computerPaddle.y = Math.min(
+        computerPaddle.y + COMPUTER_PADDLE_SPEED,
+        canvasRef.current.height - computerPaddle.height - BORDER_WIDTH
+      );
+    } else if (paddleMidpoint > ball.y) {
+      // Mueve la paleta hacia arriba si la pelota está por encima del punto medio de la paleta
+      computerPaddle.y = Math.max(
+        computerPaddle.y - COMPUTER_PADDLE_SPEED,
+        BORDER_WIDTH
+      );
+    }
 
-      if (
-        ball.y + ball.radius >= canvasRef.current.height ||
-        ball.y - ball.radius <= 0
-      ) {
-        ball.dy *= -1; // Invierte la dirección en Y
-      }
-      if (
-        ball.x + ball.radius >= canvasRef.current.width ||
-        ball.x - ball.radius <= 0
-      ) {
-        ball.dx *= -1; // Invierte la dirección en X
-      }
+    if (ball.x - ball.radius <= BORDER_WIDTH) {
+      setComputerScore((prevScore) => prevScore + 1);
+      console.log("Computer scored!", computerScore);
+      ball.x = canvasRef.current.width / 2;
+      ball.y = canvasRef.current.height / 2;
+    } else if (ball.x + ball.radius >= canvasRef.current.width - BORDER_WIDTH) {
+      setPlayerScore((prevScore) => prevScore + 1);
+      console.log("Player scored!", playerScore);
+      ball.x = canvasRef.current.width / 2;
+      ball.y = canvasRef.current.height / 2;
+    }
 
-      if (
-        ball.x - ball.radius <= playerPaddle.x + playerPaddle.width &&
-        ball.y >= playerPaddle.y &&
-        ball.y <= playerPaddle.y + playerPaddle.height
-      ) {
-        ball.dx = -ball.dx; // Invierte la dirección en X
-      }
+    if (
+      ball.y + ball.radius >= canvasRef.current.height - BORDER_WIDTH ||
+      ball.y - ball.radius <= BORDER_WIDTH
+    ) {
+      ball.dy *= -1; // Invierte la dirección en Y
+    }
 
-      // Colisión con la paleta de la computadora
-      if (
-        ball.x + ball.radius >= computerPaddle.x &&
-        ball.y >= computerPaddle.y &&
-        ball.y <= computerPaddle.y + computerPaddle.height
-      ) {
-        ball.dx = -ball.dx; // Invierte la dirección en X
-      }
+    if (
+      ball.x - ball.radius <= playerPaddle.x + playerPaddle.width &&
+      ball.y >= playerPaddle.y &&
+      ball.y <= playerPaddle.y + playerPaddle.height
+    ) {
+      ball.dx = -ball.dx; // Invierte la dirección en X
+    }
 
-      // Asegúrate de incluir la lógica para limitar las posiciones dentro del canvas,
-      // y para hacer que la pelota rebote en las paletas y bordes.
-    },
-    [
-      /* dependencias: incluye cualquier estado o prop que afecte cómo se actualizan las posiciones */
-    ]
-  );
+    // Colisión con la paleta de la computadora
+    if (
+      ball.x + ball.radius >= computerPaddle.x &&
+      ball.y >= computerPaddle.y &&
+      ball.y <= computerPaddle.y + computerPaddle.height
+    ) {
+      ball.dx = -ball.dx; // Invierte la dirección en X
+    }
+
+    // Asegúrate de incluir la lógica para limitar las posiciones dentro del canvas,
+    // y para hacer que la pelota rebote en las paletas y bordes.
+  }, [playerScore, computerScore]);
 
   const animate = useCallback(() => {
     const canvas = canvasRef.current;
@@ -163,12 +174,12 @@ const PongGame = () => {
       const playerPaddle = playerPaddleRef.current;
       switch (event.key) {
         case "ArrowUp":
-          playerPaddle.y = Math.max(playerPaddle.y - 30, 0);
+          playerPaddle.y = Math.max(playerPaddle.y - 30, BORDER_WIDTH);
           break;
         case "ArrowDown":
           playerPaddle.y = Math.min(
             playerPaddle.y + 30,
-            canvasRef.current.height - playerPaddle.height
+            canvasRef.current.height - playerPaddle.height - BORDER_WIDTH
           );
           break;
         default:
