@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback } from "react";
 
 const PongGame = () => {
+  const COMPUTER_PADDLE_SPEED = 5;
   const canvasRef = useRef(null);
   const requestRef = useRef();
   const ballRef = useRef({
@@ -59,6 +60,22 @@ const PongGame = () => {
       ball.x += ball.dx;
       ball.y += ball.dy;
       // Añade aquí la lógica de colisión
+
+      // Lógica de movimiento de la paleta de la computadora
+      const paddleMidpoint = computerPaddle.y + computerPaddle.height / 2;
+      if (paddleMidpoint < ball.y) {
+        // Mueve la paleta hacia abajo si la pelota está por debajo del punto medio de la paleta
+        computerPaddle.y = Math.min(
+          computerPaddle.y + COMPUTER_PADDLE_SPEED,
+          canvasRef.current.height - computerPaddle.height
+        );
+      } else if (paddleMidpoint > ball.y) {
+        // Mueve la paleta hacia arriba si la pelota está por encima del punto medio de la paleta
+        computerPaddle.y = Math.max(
+          computerPaddle.y - COMPUTER_PADDLE_SPEED,
+          0
+        );
+      }
 
       if (
         ball.y + ball.radius >= canvasRef.current.height ||
