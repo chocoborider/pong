@@ -1,12 +1,16 @@
 import React, { useRef, useEffect, useCallback, useState } from "react";
 
-const COMPUTER_PADDLE_SPEED = 4;
+const COMPUTER_PADDLE_SPEED = 3;
+const COMPUTER_PADDLE_SPEED_STEP = 0.2;
 const BORDER_WIDTH = 5;
 const LATERAL_WALL_COLOR = "red";
 const TOP_BOTTOM_WALL_COLOR = "blue";
 const BALL_SPEED = 5;
 
 const PongGame = () => {
+  const [computerPaddleSpeed, setComputerPaddleSpeed] = useState(
+    COMPUTER_PADDLE_SPEED
+  );
   const [playerScore, setPlayerScore] = useState(0);
   const [computerScore, setComputerScore] = useState(0);
   const canvasRef = useRef(null);
@@ -97,13 +101,13 @@ const PongGame = () => {
     if (paddleMidpoint < ball.y) {
       // Mueve la paleta hacia abajo si la pelota está por debajo del punto medio de la paleta
       computerPaddle.y = Math.min(
-        computerPaddle.y + COMPUTER_PADDLE_SPEED,
+        computerPaddle.y + computerPaddleSpeed,
         canvasRef.current.height - computerPaddle.height - BORDER_WIDTH
       );
     } else if (paddleMidpoint > ball.y) {
       // Mueve la paleta hacia arriba si la pelota está por encima del punto medio de la paleta
       computerPaddle.y = Math.max(
-        computerPaddle.y - COMPUTER_PADDLE_SPEED,
+        computerPaddle.y - computerPaddleSpeed,
         BORDER_WIDTH
       );
     }
@@ -116,6 +120,10 @@ const PongGame = () => {
     } else if (ball.x + ball.radius >= canvasRef.current.width - BORDER_WIDTH) {
       setPlayerScore((prevScore) => prevScore + 1);
       console.log("Player scored!", playerScore);
+      setComputerPaddleSpeed(
+        (prevSpeed) => prevSpeed + COMPUTER_PADDLE_SPEED_STEP
+      );
+      console.log(computerPaddleSpeed);
       ball.x = canvasRef.current.width / 2;
       ball.y = canvasRef.current.height / 2;
     }
@@ -146,7 +154,7 @@ const PongGame = () => {
 
     // Asegúrate de incluir la lógica para limitar las posiciones dentro del canvas,
     // y para hacer que la pelota rebote en las paletas y bordes.
-  }, [playerScore, computerScore]);
+  }, [playerScore, computerScore, computerPaddleSpeed]);
 
   const animate = useCallback(() => {
     const canvas = canvasRef.current;
