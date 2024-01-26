@@ -1,7 +1,11 @@
 import React, { useRef, useEffect, useCallback } from "react";
 
+const COMPUTER_PADDLE_SPEED = 5;
+const BORDER_WIDTH = 5;
+const LATERAL_WALL_COLOR = "red";
+const TOP_BOTTOM_WALL_COLOR = "blue";
+
 const PongGame = () => {
-  const COMPUTER_PADDLE_SPEED = 5;
   const canvasRef = useRef(null);
   const requestRef = useRef();
   const ballRef = useRef({
@@ -19,6 +23,24 @@ const PongGame = () => {
     (ctx) => {
       // Limpia el canvas
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+      ctx.fillStyle = LATERAL_WALL_COLOR;
+      ctx.fillRect(0, 0, BORDER_WIDTH, ctx.canvas.height);
+      ctx.fillRect(
+        ctx.canvas.width - BORDER_WIDTH,
+        0,
+        BORDER_WIDTH,
+        ctx.canvas.height
+      );
+
+      ctx.fillStyle = TOP_BOTTOM_WALL_COLOR;
+      ctx.fillRect(0, 0, ctx.canvas.width, BORDER_WIDTH);
+      ctx.fillRect(
+        0,
+        ctx.canvas.height - BORDER_WIDTH,
+        ctx.canvas.width,
+        BORDER_WIDTH
+      );
 
       // Dibuja la pelota
       ctx.fillStyle = "black";
