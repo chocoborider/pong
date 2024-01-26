@@ -118,9 +118,13 @@ const PongGame = () => {
       console.log("Computer scored!", computerScore);
       ball.x = canvasRef.current.width / 2;
       ball.y = canvasRef.current.height / 2;
+      ball.dx = BALL_SPEED;
+      ball.dy = BALL_SPEED;
     } else if (ball.x + ball.radius >= canvasRef.current.width - BORDER_WIDTH) {
       setPlayerScore((prevScore) => prevScore + 1);
       console.log("Player scored!", playerScore);
+      ball.dx = BALL_SPEED;
+      ball.dy = BALL_SPEED;
       setComputerPaddleSpeed(
         (prevSpeed) => prevSpeed + COMPUTER_PADDLE_SPEED_STEP
       );
