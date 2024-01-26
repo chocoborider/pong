@@ -6,6 +6,7 @@ const BORDER_WIDTH = 5;
 const LATERAL_WALL_COLOR = "red";
 const TOP_BOTTOM_WALL_COLOR = "blue";
 const BALL_SPEED = 5;
+const BALL_SPEED_STEP = 0.1;
 
 const PongGame = () => {
   const [computerPaddleSpeed, setComputerPaddleSpeed] = useState(
@@ -135,12 +136,15 @@ const PongGame = () => {
       ball.dy *= -1; // Invierte la dirección en Y
     }
 
+    // Colisión con la paleta del jugador
     if (
       ball.x - ball.radius <= playerPaddle.x + playerPaddle.width &&
       ball.y >= playerPaddle.y &&
       ball.y <= playerPaddle.y + playerPaddle.height
     ) {
       ball.dx = -ball.dx; // Invierte la dirección en X
+      ball.dx *= 1 + BALL_SPEED_STEP; // Aumenta la velocidad de la pelota
+      ball.dy *= 1 + BALL_SPEED_STEP; // Aumenta la velocidad de la pelota
     }
 
     // Colisión con la paleta de la computadora
