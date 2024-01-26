@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 
 const PongGame = () => {
   const canvasRef = useRef(null);
@@ -14,97 +14,102 @@ const PongGame = () => {
   const computerPaddleRef = useRef({ x: 780, y: 250, width: 10, height: 100 });
   // Asumiendo que tienes estados similares para playerPaddleRef y computerPaddleRef
 
-  const draw = (ctx) => {
-    // Limpia el canvas
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  const draw = useCallback(
+    (ctx) => {
+      // Limpia el canvas
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    // Dibuja la pelota
-    ctx.fillStyle = "black";
-    const ball = ballRef.current;
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2, true);
-    ctx.fill();
+      // Dibuja la pelota
+      ctx.fillStyle = "black";
+      const ball = ballRef.current;
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2, true);
+      ctx.fill();
 
-    // Dibuja la paleta del jugador
-    const playerPaddle = playerPaddleRef.current;
-    ctx.fillRect(
-      playerPaddle.x,
-      playerPaddle.y,
-      playerPaddle.width,
-      playerPaddle.height
-    );
+      // Dibuja la paleta del jugador
+      const playerPaddle = playerPaddleRef.current;
+      ctx.fillRect(
+        playerPaddle.x,
+        playerPaddle.y,
+        playerPaddle.width,
+        playerPaddle.height
+      );
 
-    // Dibuja la paleta de la computadora
-    const computerPaddle = computerPaddleRef.current;
-    ctx.fillRect(
-      computerPaddle.x,
-      computerPaddle.y,
-      computerPaddle.width,
-      computerPaddle.height
-    );
+      // Dibuja la paleta de la computadora
+      const computerPaddle = computerPaddleRef.current;
+      ctx.fillRect(
+        computerPaddle.x,
+        computerPaddle.y,
+        computerPaddle.width,
+        computerPaddle.height
+      );
+    },
+    [
+      /* aquí van las dependencias de draw, por ejemplo, si usas estado/props para determinar cómo dibujar algo */
+    ]
+  );
 
-    // Actualiza las posiciones para la próxima frame
-    updatePositions();
-  };
+  const updatePositions = useCallback(
+    () => {
+      // Lógica para actualizar posiciones y manejar colisiones
+      const ball = ballRef.current;
+      const playerPaddle = playerPaddleRef.current;
+      const computerPaddle = computerPaddleRef.current;
+      // Ejemplo: Actualizar posición de la pelota
+      ball.x += ball.dx;
+      ball.y += ball.dy;
+      // Añade aquí la lógica de colisión
 
-  const updatePositions = () => {
-    const ball = ballRef.current;
-    const playerPaddle = playerPaddleRef.current;
-    const computerPaddle = computerPaddleRef.current;
-    // Actualiza la posición de la pelota basándote en la velocidad actual
-    ball.x += ball.dx;
-    ball.y += ball.dy;
+      if (
+        ball.y + ball.radius >= canvasRef.current.height ||
+        ball.y - ball.radius <= 0
+      ) {
+        ball.dy *= -1; // Invierte la dirección en Y
+      }
+      if (
+        ball.x + ball.radius >= canvasRef.current.width ||
+        ball.x - ball.radius <= 0
+      ) {
+        ball.dx *= -1; // Invierte la dirección en X
+      }
 
-    // Agrega aquí la lógica de colisión y rebote
+      if (
+        ball.x - ball.radius <= playerPaddle.x + playerPaddle.width &&
+        ball.y >= playerPaddle.y &&
+        ball.y <= playerPaddle.y + playerPaddle.height
+      ) {
+        ball.dx = -ball.dx; // Invierte la dirección en X
+      }
 
-    // Ejemplo de rebote en los bordes del canvas
-    if (
-      ball.y + ball.radius >= canvasRef.current.height ||
-      ball.y - ball.radius <= 0
-    ) {
-      ball.dy *= -1; // Invierte la dirección en Y
-    }
-    if (
-      ball.x + ball.radius >= canvasRef.current.width ||
-      ball.x - ball.radius <= 0
-    ) {
-      ball.dx *= -1; // Invierte la dirección en X
-    }
+      // Colisión con la paleta de la computadora
+      if (
+        ball.x + ball.radius >= computerPaddle.x &&
+        ball.y >= computerPaddle.y &&
+        ball.y <= computerPaddle.y + computerPaddle.height
+      ) {
+        ball.dx = -ball.dx; // Invierte la dirección en X
+      }
 
-    if (
-      ball.x - ball.radius <= playerPaddle.x + playerPaddle.width &&
-      ball.y >= playerPaddle.y &&
-      ball.y <= playerPaddle.y + playerPaddle.height
-    ) {
-      ball.dx = -ball.dx; // Invierte la dirección en X
-    }
+      // Asegúrate de incluir la lógica para limitar las posiciones dentro del canvas,
+      // y para hacer que la pelota rebote en las paletas y bordes.
+    },
+    [
+      /* dependencias: incluye cualquier estado o prop que afecte cómo se actualizan las posiciones */
+    ]
+  );
 
-    // Colisión con la paleta de la computadora
-    if (
-      ball.x + ball.radius >= computerPaddle.x &&
-      ball.y >= computerPaddle.y &&
-      ball.y <= computerPaddle.y + computerPaddle.height
-    ) {
-      ball.dx = -ball.dx; // Invierte la dirección en X
-    }
-  };
-
-  const animate = () => {
+  const animate = useCallback(() => {
     const canvas = canvasRef.current;
     if (canvas) {
       const ctx = canvas.getContext("2d");
       if (ctx) {
-        // Limpia el canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Dibuja los elementos del juego
-        draw(ctx);
-
-        // Continúa el loop de animación
+        updatePositions(); // Asegúrate de que `updatePositions` esté envuelto en useCallback si depende de props o state
+        draw(ctx); // Asegúrate de que `draw` también esté envuelto en useCallback si depende de props o state
         requestRef.current = requestAnimationFrame(animate);
       }
     }
-  };
+  }, [draw, updatePositions]);
 
   useEffect(() => {
     // Inicia la animación cuando el componente se monta
@@ -112,7 +117,7 @@ const PongGame = () => {
 
     // Función de limpieza para cancelar la animación si el componente se desmonta
     return () => cancelAnimationFrame(requestRef.current);
-  }, []); // Dependencias vacías aseguran que esto solo se ejecute al montar y desmontar
+  }, [animate]); // Dependencias vacías aseguran que esto solo se ejecute al montar y desmontar
 
   useEffect(() => {
     const handleKeyDown = (event) => {
