@@ -29,6 +29,27 @@ const PongGame = () => {
   const computerPaddleRef = useRef({ x: 780, y: 250, width: 10, height: 100 });
   // Asumiendo que tienes estados similares para playerPaddleRef y computerPaddleRef
 
+  const adjustCanvasSize = () => {
+    const { innerWidth: width, innerHeight: height } = window;
+    const canvas = canvasRef.current;
+    if (canvas) {
+      // Establece un máximo para asegurar que el juego sea jugable
+      const maxWidth = 800; // Ajusta según tus necesidades
+      const maxHeight = 600; // Ajusta según tus necesidades
+
+      // Ajusta el tamaño del canvas para mantener la relación de aspecto
+      const gameRatio = maxWidth / maxHeight;
+      const currentRatio = width / height;
+      if (currentRatio < gameRatio) {
+        canvas.width = width;
+        canvas.height = width / gameRatio;
+      } else {
+        canvas.width = height * gameRatio;
+        canvas.height = height;
+      }
+    }
+  };
+
   const handlePlayerMovement = (direction) => {
     const moveAmount = 20; // Cuánto quieres que se mueva la paleta por cada evento
 
@@ -200,6 +221,12 @@ const PongGame = () => {
       }
     }
   }, [draw, updatePositions]);
+
+  useEffect(() => {
+    adjustCanvasSize();
+    window.addEventListener("resize", adjustCanvasSize);
+    return () => window.removeEventListener("resize", adjustCanvasSize);
+  }, []);
 
   useEffect(() => {
     if (isGameStarted) {

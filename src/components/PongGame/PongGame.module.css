@@ -3,7 +3,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* Usa el 100% de la altura de la ventana del navegador */
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
 }
 
 .startButton {
@@ -38,11 +40,19 @@
 }
 
 .controlButton {
-  padding: 20px;
-  font-size: 24px;
+  padding: 15px 30px;
+  margin: 10px;
+  font-size: 20px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .controlButtons {
+    padding: 20px 40px;
+    font-size: 24px;
+  }
 }
