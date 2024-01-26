@@ -29,6 +29,28 @@ const PongGame = () => {
   const computerPaddleRef = useRef({ x: 780, y: 250, width: 10, height: 100 });
   // Asumiendo que tienes estados similares para playerPaddleRef y computerPaddleRef
 
+  const handlePlayerMovement = (direction) => {
+    const moveAmount = 20; // Cuánto quieres que se mueva la paleta por cada evento
+
+    // Actualizar la posición de la paleta del jugador basada en la dirección
+    const playerPaddle = playerPaddleRef.current;
+    if (direction === -1) {
+      // Mover hacia arriba
+      playerPaddle.y = Math.max(playerPaddle.y - moveAmount, BORDER_WIDTH);
+    } else if (direction === 1) {
+      // Mover hacia abajo
+      playerPaddle.y = Math.min(
+        playerPaddle.y + moveAmount,
+        canvasRef.current.height - playerPaddle.height - BORDER_WIDTH
+      );
+    } // direction 0 podría detener el movimiento si implementas una lógica de movimiento continuo
+  };
+
+  const handleTouchStart = (direction, event) => {
+    event.preventDefault(); // Evita acciones por defecto como el zoom
+    handlePlayerMovement(direction);
+  };
+
   const draw = useCallback(
     (ctx) => {
       // Limpia el canvas
@@ -226,6 +248,28 @@ const PongGame = () => {
         </button>
       )}
       {isGameStarted && <canvas ref={canvasRef} width="800" height="600" />}
+      {isGameStarted && (
+        <div className={styles.controlButtons}>
+          <button
+            onTouchStart={(e) => handleTouchStart(-1, e)}
+            onTouchEnd={(e) => handleTouchStart(0, e)}
+            onMouseDown={() => handlePlayerMovement(-1)}
+            onMouseUp={() => handlePlayerMovement(0)}
+            className={styles.controlButton}
+          >
+            ↑
+          </button>
+          <button
+            onTouchStart={(e) => handleTouchStart(1, e)}
+            onTouchEnd={(e) => handleTouchStart(0, e)}
+            onMouseDown={() => handlePlayerMovement(1)}
+            onMouseUp={() => handlePlayerMovement(0)}
+            className={styles.controlButton}
+          >
+            ↓
+          </button>
+        </div>
+      )}
     </div>
   );
 };

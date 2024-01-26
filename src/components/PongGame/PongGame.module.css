@@ -30,3 +30,19 @@
   box-shadow: 0 2px #0056b3;
   transform: translateY(2px);
 }
+
+.controlButtons {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Ajusta el espacio entre botones */
+}
+
+.controlButton {
+  padding: 20px;
+  font-size: 24px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
