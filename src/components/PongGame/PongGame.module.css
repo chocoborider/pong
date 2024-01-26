@@ -1,0 +1,32 @@
+/* PongGame.module.css */
+.gameContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Usa el 100% de la altura de la ventana del navegador */
+}
+
+.startButton {
+  padding: 12px 24px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.3s ease;
+
+  /* Sombra y un efecto ligeramente 3D */
+  box-shadow: 0 4px #0056b3;
+}
+
+.startButton:hover {
+  background-color: #0056b3;
+}
+
+.startButton:active {
+  box-shadow: 0 2px #0056b3;
+  transform: translateY(2px);
+}

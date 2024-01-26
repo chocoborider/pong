@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useCallback, useState } from "react";
+import styles from "./PongGame.module.css";
 
 const COMPUTER_PADDLE_SPEED = 3;
 const COMPUTER_PADDLE_SPEED_STEP = 0.2;
@@ -9,6 +10,7 @@ const BALL_SPEED = 5;
 const BALL_SPEED_STEP = 0.1;
 
 const PongGame = () => {
+  const [isGameStarted, setIsGameStarted] = useState(false);
   const [computerPaddleSpeed, setComputerPaddleSpeed] = useState(
     COMPUTER_PADDLE_SPEED
   );
@@ -178,12 +180,12 @@ const PongGame = () => {
   }, [draw, updatePositions]);
 
   useEffect(() => {
-    // Inicia la animación cuando el componente se monta
-    requestRef.current = requestAnimationFrame(animate);
-
-    // Función de limpieza para cancelar la animación si el componente se desmonta
-    return () => cancelAnimationFrame(requestRef.current);
-  }, [animate]); // Dependencias vacías aseguran que esto solo se ejecute al montar y desmontar
+    if (isGameStarted) {
+      requestRef.current = requestAnimationFrame(animate);
+      // Función de limpieza para cancelar la animación si el componente se desmonta
+      return () => cancelAnimationFrame(requestRef.current);
+    }
+  }, [animate, isGameStarted]); // Dependencias vacías aseguran que esto solo se ejecute al montar y desmontar
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -211,7 +213,21 @@ const PongGame = () => {
     };
   }, []); // Nota: no hay dependencias ya que la referencia no cambia.
 
-  return <canvas ref={canvasRef} width="800" height="600" />;
+  return (
+    <div className={styles.gameContainer}>
+      {" "}
+      {/* Usa flexbox para centrar el botón */}
+      {!isGameStarted && (
+        <button
+          onClick={() => setIsGameStarted(true)}
+          className={styles.startButton}
+        >
+          Iniciar Juego
+        </button>
+      )}
+      {isGameStarted && <canvas ref={canvasRef} width="800" height="600" />}
+    </div>
+  );
 };
 
 export default PongGame;
